@@ -3,8 +3,13 @@ import flwr as fl
 import numpy as np
 
 from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import precision_score, recall_score, f1_score
 from sklearn.metrics import log_loss
-
+from imblearn.over_sampling import ADASYN,SMOTE
+smote = SMOTE(sampling_strategy=0.7)
+adasyn= ADASYN(sampling_strategy=0.7)
+from collections import Counter
+from sklearn.metrics import confusion_matrix
 import utils
 
 if __name__ == "__main__":
@@ -12,8 +17,21 @@ if __name__ == "__main__":
     (X_train, y_train), (X_test, y_test) = utils.load_data()
 
     # Split train set into 10 partitions and randomly use one for training.
-    partition_id = np.random.choice(10)
-    (X_train, y_train) = utils.partition(X_train, y_train, 10)[8]
+    partition_id = np.random.choice(5)
+    (X_train, y_train) = utils.partition(X_train, y_train, 5)[4]
+
+    print("Client5: ",Counter(y_train),sep=" ")
+
+    # X_train_smote, Y_train_smote = adasyn.fit_resample(X_train, y_train)
+    
+
+    # X_train=np.concatenate((X_train, X_train_smote), axis=0)
+    # y_train=np.concatenate((y_train, Y_train_smote), axis=0) 
+
+    # X_train = ['FC1_Read_Input_Register','FC2_Read_Discrete_Value','FC3_Read_Holding_Register','FC4_Read_Coil']
+    # y_train.columns = ['label']
+
+    print("After Client5: ", Counter(y_train),sep=" ")
 
     # Create LogisticRegression Model
     model = LogisticRegression()
@@ -39,6 +57,15 @@ if __name__ == "__main__":
             utils.set_model_params(model, parameters)
             loss = log_loss(y_test, model.predict_proba(X_test))
             accuracy = model.score(X_test, y_test)
+            # print(accuracy)
+            y_pred = model.predict(X_test)
+            # print(y_pred)
+            # recall = recall_score(y_test,y_pred)
+            cm = confusion_matrix(y_test,y_pred)
+            print(cm)
+            print("Precision: ", cm[0][0]/(cm[0][1]+cm[0][0]))
+            print("Recall: ",cm[0][0]/(cm[0][0]+cm[1][0]))
+            print("F1_Score: ",(2*(cm[0][0]/(cm[0][1]+cm[0][0]))*(cm[0][0]/(cm[0][0]+cm[1][0])))/((cm[0][0]/(cm[0][1]+cm[0][0]))+(cm[0][0]/(cm[0][0]+cm[1][0]))))
             return loss, len(X_test), {"accuracy": accuracy}
 
     # Start Flower client

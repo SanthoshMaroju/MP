@@ -3,8 +3,12 @@ import flwr as fl
 import numpy as np
 
 from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import precision_score, recall_score, f1_score
 from sklearn.metrics import log_loss
-
+from imblearn.over_sampling import ADASYN,SMOTE
+smote = SMOTE(sampling_strategy=0.7)
+adasyn= ADASYN(sampling_strategy=0.7)
+from collections import Counter
 import utils
 
 if __name__ == "__main__":
@@ -13,8 +17,16 @@ if __name__ == "__main__":
 
     # Split train set into 10 partitions and randomly use one for training.
     partition_id = np.random.choice(5)
-    (X_train, y_train) = utils.partition(X_train, y_train, 10)[4]
+    (X_train, y_train) = utils.partition(X_train, y_train, 5)[3]
 
+    print("Client4: ",Counter(y_train),sep=" ")
+
+    X_train_smote, Y_train_smote = adasyn.fit_resample(X_train, y_train)
+
+    X_train=np.concatenate((X_train, X_train_smote), axis=0)
+    y_train=np.concatenate((y_train, Y_train_smote), axis=0) 
+
+    print("After Client4: ", Counter(y_train),sep=" ")
     # Create LogisticRegression Model
     model = LogisticRegression()
 

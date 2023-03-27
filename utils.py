@@ -3,6 +3,12 @@ import numpy as np
 from sklearn.linear_model import LogisticRegression
 import random
 import pandas as pd
+from imblearn.over_sampling import ADASYN,SMOTE
+from sklearn.preprocessing import MinMaxScaler
+smote = SMOTE()
+adasyn= ADASYN()
+from collections import Counter
+
 from sklearn.model_selection import train_test_split
 
 XY = Tuple[np.ndarray, np.ndarray]
@@ -54,21 +60,34 @@ def set_initial_params(model: LogisticRegression):
 def load_data() -> Dataset:
     
     df = pd.read_csv("D:\Major_Project\MP\IoT_Modbus.csv")
-    
+    # print(type(df))
     
     df_x = df.drop( ['label','date','time','type'] , axis="columns").values
     df_y = df['label'].values
+    # print(type(df_x),type(df_y))
+    # print("-----------------------------------------------------------")
+    # df_X, df_Y= smote.fit_resample(df_x,df_y)
 
-    x_train, x_test, y_train, y_test = train_test_split(df_x, df_y, test_size=0.30)
-
-
+    # df_x=np.concatenate((df_x, df_X), axis=0)
+    # df_y=np.concatenate((df_y, df_Y), axis=0) 
+    # print("-----------------------------------------------------------")
+    # print(type(df_X),type(df_Y))
+    # df_x = df_x.append(df_X)
+    # df_y = df_y.append(df_Y)
+    x_train, x_test, y_train, y_test = train_test_split(df_x, df_y, test_size=0.3)
+    # print("-----------------------------------------------------------")
+    # print(Counter(y_train))
+    # x_train, y_train = adasyn.fit_resample(x_train, y_train)
+    # x_train = pd.DataFrame(x_train_smote, columns = ['FC1_Read_Input_Register','FC2_Read_Discrete_Value','FC3_Read_Holding_Register','FC4_Read_Coil'])
+    # y_train = pd.DataFrame(y_train_smote,columns = ['label'])
+    # print(type(x_train))
+    # print("-----------------------------------------------------------")
+    # print(Counter(y_train))
+    # x_train = x_train.concatenate(x_train,x_train_smote)
+    # y_train = y_train.concatenate(y_train,y_train_smote)
     # df_test = pd.read_csv("D:/Major_Project/MP/Train_Test_IoT_Modbus.csv")
     # df = pd.read_csv("D:/Major_Project/MP/Train_Test_IoT_Modbus.csv")
-    # df_test['rand_num'] = [random.random() for _ in range(len(df_test))]
-    # df_test = df_test.sort_values(by='rand_num')
-    # df_test = df_test.drop(['rand_num'], axis = "columns")
-    # df_test = pd.concat([df,df_test])
-    # print(len(df), len(df_test))
+
 
     # x_test = df_test.drop( ['ts','date','time','type','label'], axis="columns").values
     # y_test = df_test['label'].values
